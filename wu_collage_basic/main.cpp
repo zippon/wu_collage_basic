@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include "wu_collage_basic.h"
 
 int main(int argc, const char * argv[])
 {

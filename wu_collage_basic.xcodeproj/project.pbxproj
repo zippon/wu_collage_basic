@@ -28,6 +28,7 @@
 		94627FD915DA00A80073D3B9 /* wu_collage_basic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = wu_collage_basic; sourceTree = BUILT_PRODUCTS_DIR; };
 		94627FDD15DA00A80073D3B9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		94627FDF15DA00A80073D3B9 /* wu_collage_basic.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = wu_collage_basic.1; sourceTree = "<group>"; };
+		946335F215DA41ED004D4ADB /* wu_collage_basic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wu_collage_basic.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				94627FDD15DA00A80073D3B9 /* main.cpp */,
+				946335F215DA41ED004D4ADB /* wu_collage_basic.h */,
 				94627FDF15DA00A80073D3B9 /* wu_collage_basic.1 */,
 			);
 			path = wu_collage_basic;
@@ -176,6 +178,7 @@
 		94627FE415DA00A80073D3B9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = "/usr/local/include/**";
 				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
 				OTHER_LDFLAGS = (
 					"-lopencv_core",
@@ -189,6 +192,7 @@
 		94627FE515DA00A80073D3B9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = "/usr/local/include/**";
 				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
 				OTHER_LDFLAGS = (
 					"-lopencv_core",
@@ -218,6 +222,7 @@
 				94627FE515DA00A80073D3B9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
