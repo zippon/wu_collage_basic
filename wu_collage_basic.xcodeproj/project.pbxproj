@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		94627FDE15DA00A80073D3B9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94627FDD15DA00A80073D3B9 /* main.cpp */; };
 		94627FE015DA00A80073D3B9 /* wu_collage_basic.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 94627FDF15DA00A80073D3B9 /* wu_collage_basic.1 */; };
+		94C743C115DB3396004BD3CF /* wu_collage_basic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94C743C015DB3396004BD3CF /* wu_collage_basic.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,7 @@
 		94627FDD15DA00A80073D3B9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		94627FDF15DA00A80073D3B9 /* wu_collage_basic.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = wu_collage_basic.1; sourceTree = "<group>"; };
 		946335F215DA41ED004D4ADB /* wu_collage_basic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wu_collage_basic.h; sourceTree = "<group>"; };
+		94C743C015DB3396004BD3CF /* wu_collage_basic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wu_collage_basic.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				94627FDD15DA00A80073D3B9 /* main.cpp */,
 				946335F215DA41ED004D4ADB /* wu_collage_basic.h */,
 				94627FDF15DA00A80073D3B9 /* wu_collage_basic.1 */,
+				94C743C015DB3396004BD3CF /* wu_collage_basic.cpp */,
 			);
 			path = wu_collage_basic;
 			sourceTree = "<group>";
@@ -120,6 +123,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				94627FDE15DA00A80073D3B9 /* main.cpp in Sources */,
+				94C743C115DB3396004BD3CF /* wu_collage_basic.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,6 +187,7 @@
 				OTHER_LDFLAGS = (
 					"-lopencv_core",
 					"-lopencv_highgui",
+					"-lopencv_imgproc",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = "/usr/local/include/**";
@@ -197,6 +202,7 @@
 				OTHER_LDFLAGS = (
 					"-lopencv_core",
 					"-lopencv_highgui",
+					"-lopencv_imgproc",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = "/usr/local/include/**";
