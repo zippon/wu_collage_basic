@@ -12,7 +12,8 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
-#define MAX_ITER_NUM 50
+#define MAX_ITER_NUM 100       // Max number of aspect ratio adjustment.
+#define MAX_TREE_GENE_NUM 100  // Max number of tree re-generation.
 
 class TreeNode {
 public:
@@ -53,7 +54,7 @@ public:
     canvas_height_ = canvas_height;
     canvas_alpha_ = -1;
     canvas_width_ = -1;
-    image_num_ = 0;
+    image_num_ = static_cast<int>(image_vec_.size());
     tree_root_ = new TreeNode();
   }
   ~CollageBasic() {
@@ -110,7 +111,7 @@ private:
   // Random assign a 'v' (vertical cut) or 'h' (horizontal cut) for all the inner nodes.
   void RandomSplitType(TreeNode* node);
   // Top-down adjust aspect ratio for the final collage.
-  void AdjustAlpha(TreeNode* node);
+  void AdjustAlpha(TreeNode* node, float thresh);
   
   // Vector containing input images.
   std::vector<cv::Mat> image_vec_;

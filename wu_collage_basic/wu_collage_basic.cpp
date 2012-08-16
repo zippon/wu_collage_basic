@@ -29,6 +29,8 @@ bool CollageBasic::CreateCollage() {
     return false;
   }
   
+  srand(static_cast<unsigned>(time(0)));
+  
   // A: generate a full balanced binary tree with image_num_ leaves.
   GenerateInitialTree();
   // B: recursively calculate aspect ratio.
@@ -55,10 +57,16 @@ bool CollageBasic::CreateCollage() {
 // If max iteration number is reached and we cannot find a good result aspect ratio,
 // this function returns false.
 bool CollageBasic::CreateCollage(float expect_alpha, float thresh) {
+  assert(thresh > 1);
+  assert(expect_alpha > 0);
   tree_root_->alpha_expect_ = expect_alpha;
   float lower_bound = expect_alpha / thresh;
   float upper_bound = expect_alpha * thresh;
   int iter_counter = 1;
+  int tree_gene_counter = 1;
+  
+  srand(static_cast<unsigned>(time(0)));
+  
   // Do the initial tree generatio and calculation.
   // A: generate a full balanced binary tree with image_num_ leaves.
   GenerateInitialTree();
@@ -67,13 +75,33 @@ bool CollageBasic::CreateCollage(float expect_alpha, float thresh) {
   
   while ((canvas_alpha_ < lower_bound) || (canvas_alpha_ > upper_bound)) {
     // Call the following function to adjust the aspect ratio from top to down.
-    AdjustAlpha(tree_root_);
+    tree_root_->alpha_expect_ = expect_alpha;
+    AdjustAlpha(tree_root_, thresh);
     // Calculate actual aspect ratio again.
     canvas_alpha_ = CalculateAlpha(tree_root_);
     ++iter_counter;
-    if (iter_counter > MAX_ITER_NUM) return false;
+    if (iter_counter > MAX_ITER_NUM) {
+      std::cout << "*******************************" << std::endl;
+      std::cout << "max iteration number reached..." << std::endl;
+      std::cout << "*******************************" << std::endl << std::endl;
+      // We should generate binary tree again
+      iter_counter = 1;
+      GenerateInitialTree();
+      canvas_alpha_ = CalculateAlpha(tree_root_);
+      ++tree_gene_counter;
+      if (tree_gene_counter > MAX_TREE_GENE_NUM) {
+        std::cout << "-------------------------------------------------------";
+        std::cout << std::endl;
+        std::cout << "WE HAVE DONE OUR BEST, BUT COLAAGE GENERATION FAILED...";
+        std::cout << std::endl;
+        std::cout << "-------------------------------------------------------";
+        std::cout << std::endl;
+        return false;
+      }
+    }
   }
-  
+  // std::cout << "Canvas generation success!" << std::endl;
+  std::cout << "Total iteration number is: " << iter_counter << std::endl;
   // After adjustment, set the position for all the tile images.
   canvas_width_ = static_cast<int>(canvas_height_ * canvas_alpha_);
   tree_root_->position_.x = 0;
@@ -182,7 +210,7 @@ bool CollageBasic::GenerateInitialTree() {
   // Step 2: randomly select image_num_ - 2 ^ (k - 1) leaves,
   // split them with left and right children. Then, you have a
   // full balanced binary tree with image_num_ leaves.
-  srand(static_cast<unsigned>(time(0)));
+
   int left_leaves = image_num_ - leaf_num;
   int counter = 0;
   while (counter < left_leaves) {
@@ -328,16 +356,19 @@ void CollageBasic::RandomSplitType(TreeNode* node) {
   RandomSplitType(node->right_child_);
 }
 
-void CollageBasic::AdjustAlpha(TreeNode *node) {
+void CollageBasic::AdjustAlpha(TreeNode *node, float thresh) {
+  assert(thresh > 1);
   if (node->is_leaf_) return;
   if (node == NULL) return;
   
-  if (node->alpha_ > node->alpha_expect_ * 1.2) {
+  float thresh_2 = 1 + (thresh - 1) / 2;
+  
+  if (node->alpha_ > node->alpha_expect_ * thresh_2) {
     // Too big actual aspect ratio.
     node->split_type_ = 'h';
     node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
     node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
-  } else if (node->alpha_ < node->alpha_expect_ / 1.2) {
+  } else if (node->alpha_ < node->alpha_expect_ / thresh_2 ) {
     // Too small actual aspect ratio.
     node->split_type_ = 'v';
     node->left_child_->alpha_expect_ = node->alpha_expect_ / 2;
@@ -355,6 +386,6 @@ void CollageBasic::AdjustAlpha(TreeNode *node) {
       return;
     }
   }
-  AdjustAlpha(node->left_child_);
-  AdjustAlpha(node->right_child_);
+  AdjustAlpha(node->left_child_, thresh);
+  AdjustAlpha(node->right_child_, thresh);
 }

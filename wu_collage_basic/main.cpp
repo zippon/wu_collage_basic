@@ -19,17 +19,21 @@ int main(int argc, const char * argv[])
   }
   std::string image_list(argv[1]);
   int canvas_height = 0;
-  while (canvas_height <= 0) {
-    std::cout << "canvas_height: ";
+  while ((canvas_height < 100) || (canvas_height > 2000)) {
+    std::cout << "canvas_height [100, 2000]: ";
     std::cin >> canvas_height;
-    std::cout << std::endl;
+  }
+  float expect_alpha = 0;
+  while ((expect_alpha < 0.1) || (expect_alpha > 10)) {
+    std::cout << "expect_alpha: [0.1, 10]";
+    std::cin >> expect_alpha;
   }
   
   clock_t start, end;
   start = clock();
   CollageBasic my_collage(image_list, canvas_height);
   //bool success = my_collage.CreateCollage();
-  bool success = my_collage.CreateCollage(1.3, 2);
+  bool success = my_collage.CreateCollage(expect_alpha, 1.1);
   if (!success) {
     std::cout << "Collage generation failure!" << std::endl;
     return -1;
