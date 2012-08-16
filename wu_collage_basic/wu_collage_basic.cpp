@@ -134,9 +134,46 @@ cv::Mat CollageBasic::OutputCollageImage() const {
 
 // After calling CreateCollage(), call this function to save result
 // collage to a html file specified by out_put_html_path.
-// bool CollageBasic::OutputCollageHtml(const std::string output_html_path) {
+bool CollageBasic::OutputCollageHtml(const std::string output_html_path) {
+  assert(canvas_alpha_ != -1);
+  assert(canvas_width_ != -1);
+  std::ofstream output_html(output_html_path.c_str());
+  if (!output_html) {
+    std::cout << "Error: OutputCollageHtml" << std::endl;
+  }
   
-//}
+  output_html << "<!DOCTYPE html>\n";
+  output_html << "<html>\n";
+  output_html << "<h1 style=\"text-align:left\">\n";
+  output_html << "\tImage Collage\n";
+  output_html << "</h1>\n";
+  output_html << "<hr //>\n";
+  output_html << "\t<body>\n";
+  output_html << "\t\t<div style=\"position:absolute;\">\n";
+  for (int i = 0; i < image_num_; ++i) {
+    int img_ind = tree_leaves_[i]->image_index_;
+    output_html << "\t\t\t<a href=\"";
+    output_html << image_path_vec_[img_ind];
+    output_html << "\">\n";
+    output_html << "\t\t\t\t<img src=\"";
+    output_html << image_path_vec_[img_ind];
+    output_html << "\" style=\"position:absolute; width:";
+    output_html << tree_leaves_[i]->position_.width;
+    output_html << "px; height:";
+    output_html << tree_leaves_[i]->position_.height;
+    output_html << "px; left:";
+    output_html << tree_leaves_[i]->position_.x;
+    output_html << "px; top:";
+    output_html << tree_leaves_[i]->position_.y;
+    output_html << "px;\">\n";
+    output_html << "\t\t\t</a>\n";
+  }
+  output_html << "\t\t</div>\n";
+  output_html << "\t</body>\n";
+  output_html << "</html>";
+  output_html.close();
+  return true;
+}
 
 // Private member functions:
 // The images are stored in the image list, one image path per row.
@@ -157,6 +194,7 @@ bool CollageBasic::ReadImageList(std::string input_image_list) {
     image_vec_.push_back(img);
     float img_alpha = static_cast<float>(img.cols) / img.rows;
     image_alpha_vec_.push_back(img_alpha);
+    image_path_vec_.push_back(img_path);
   }
   input_list.close();
   return true;

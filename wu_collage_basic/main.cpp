@@ -25,26 +25,29 @@ int main(int argc, const char * argv[])
   }
   float expect_alpha = 0;
   while ((expect_alpha < 0.1) || (expect_alpha > 10)) {
-    std::cout << "expect_alpha: [0.1, 10]";
+    std::cout << "expect_alpha: [0.1, 10]: ";
     std::cin >> expect_alpha;
   }
   
   clock_t start, end;
-  start = clock();
   CollageBasic my_collage(image_list, canvas_height);
+  
+  start = clock();
   //bool success = my_collage.CreateCollage();
   bool success = my_collage.CreateCollage(expect_alpha, 1.1);
   if (!success) {
-    std::cout << "Collage generation failure!" << std::endl;
     return -1;
   }
-  cv::Mat canvas = my_collage.OutputCollageImage();
   end = clock();
+  
+  cv::Mat canvas = my_collage.OutputCollageImage();
   int canvas_width = my_collage.canvas_width();
   float canvas_alpha = my_collage.canvas_alpha();
   std::cout << "canvas_width: " << canvas_width << std::endl;
   std::cout << "canvas_alpha: " << canvas_alpha << std::endl;
-  std::cout << "processing time: " << (end - start) * 1000 / CLOCKS_PER_SEC << " ms" << std::endl;
+  std::cout << "processing time: " << (end - start) * 1000000 / CLOCKS_PER_SEC
+            << " us (10e-6 s)" << std::endl;
+  my_collage.OutputCollageHtml("/Users/WU/result.html");
   cv::imshow("Collage", canvas);
   cv::waitKey();
   

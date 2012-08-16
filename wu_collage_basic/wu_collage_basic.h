@@ -61,6 +61,7 @@ public:
     ReleaseTree(tree_root_);
     image_vec_.clear();
     image_alpha_vec_.clear();
+    image_path_vec_.clear();
   }
   // Create collage.
   bool CreateCollage();
@@ -80,7 +81,7 @@ public:
   // Output collage into a single image.
   cv::Mat OutputCollageImage() const;
   // Output collage into a html page.
-  // bool OutputCollageHtml (const std::string output_html_path);
+  bool OutputCollageHtml (const std::string output_html_path);
   
   // Accessors:
   int image_num() const {
@@ -113,6 +114,8 @@ private:
   // Top-down adjust aspect ratio for the final collage.
   void AdjustAlpha(TreeNode* node, float thresh);
   
+  // Vector containing input image paths.
+  std::vector<std::string> image_path_vec_;
   // Vector containing input images.
   std::vector<cv::Mat> image_vec_;
   // Vector containing input images' aspect ratios.
