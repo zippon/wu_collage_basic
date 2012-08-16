@@ -28,9 +28,10 @@ int main(int argc, const char * argv[])
   clock_t start, end;
   start = clock();
   CollageBasic my_collage(image_list, canvas_height);
-  bool success = my_collage.CreateCollage();
+  //bool success = my_collage.CreateCollage();
+  bool success = my_collage.CreateCollage(1.3, 2);
   if (!success) {
-    std::cout << "Error!" << std::endl;
+    std::cout << "Collage generation failure!" << std::endl;
     return -1;
   }
   cv::Mat canvas = my_collage.OutputCollageImage();

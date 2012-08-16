@@ -12,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
+#define MAX_ITER_NUM 50
 
 class TreeNode {
 public:
@@ -60,8 +61,21 @@ public:
     image_vec_.clear();
     image_alpha_vec_.clear();
   }
-  // Create Collage.
+  // Create collage.
   bool CreateCollage();
+  
+  // If we use CreateCollage, the generated collage may have strange aspect ratio such as
+  // too big or too small, which seems to be difficult to be shown. We let the user to
+  // input their expected aspect ratio and fast adjust to make the result aspect ratio
+  // close to the user defined one.
+  // The thresh here controls the closeness between the result aspect ratio and the expect
+  // aspect ratio. e.g. expect_alpha is 1, thresh is 2. The result aspect ratio is around
+  // [1 / 2, 1 * 2] = [0.5, 2].
+  // We also define MAX_ITER_NUM = 100,
+  // If max iteration number is reached and we cannot find a good result aspect ratio,
+  // this function returns false.
+  bool CreateCollage(float expect_alpha, float thresh = 2);
+  
   // Output collage into a single image.
   cv::Mat OutputCollageImage() const;
   // Output collage into a html page.
@@ -95,6 +109,8 @@ private:
   void ReleaseTree(TreeNode* node);
   // Random assign a 'v' (vertical cut) or 'h' (horizontal cut) for all the inner nodes.
   void RandomSplitType(TreeNode* node);
+  // Top-down adjust aspect ratio for the final collage.
+  void AdjustAlpha(TreeNode* node);
   
   // Vector containing input images.
   std::vector<cv::Mat> image_vec_;

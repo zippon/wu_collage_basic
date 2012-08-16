@@ -44,7 +44,48 @@ bool CollageBasic::CreateCollage() {
   return true;
 };
 
-// After calling CreateCollage(), call this function to save result
+// If we use CreateCollage, the generated collage may have strange aspect ratio such as
+// too big or too small, which seems to be difficult to be shown. We let the user to
+// input their expected aspect ratio and fast adjust to make the result aspect ratio
+// close to the user defined one.
+// The thresh here controls the closeness between the result aspect ratio and the expect
+// aspect ratio. e.g. expect_alpha is 1, thresh is 2. The result aspect ratio is around
+// [1 / 2, 1 * 2] = [0.5, 2].
+// We also define MAX_ITER_NUM = 100,
+// If max iteration number is reached and we cannot find a good result aspect ratio,
+// this function returns false.
+bool CollageBasic::CreateCollage(float expect_alpha, float thresh) {
+  tree_root_->alpha_expect_ = expect_alpha;
+  float lower_bound = expect_alpha / thresh;
+  float upper_bound = expect_alpha * thresh;
+  int iter_counter = 1;
+  // Do the initial tree generatio and calculation.
+  // A: generate a full balanced binary tree with image_num_ leaves.
+  GenerateInitialTree();
+  // B: recursively calculate aspect ratio.
+  canvas_alpha_ = CalculateAlpha(tree_root_);
+  
+  while ((canvas_alpha_ < lower_bound) || (canvas_alpha_ > upper_bound)) {
+    // Call the following function to adjust the aspect ratio from top to down.
+    AdjustAlpha(tree_root_);
+    // Calculate actual aspect ratio again.
+    canvas_alpha_ = CalculateAlpha(tree_root_);
+    ++iter_counter;
+    if (iter_counter > MAX_ITER_NUM) return false;
+  }
+  
+  // After adjustment, set the position for all the tile images.
+  canvas_width_ = static_cast<int>(canvas_height_ * canvas_alpha_);
+  tree_root_->position_.x = 0;
+  tree_root_->position_.y = 0;
+  tree_root_->position_.height = canvas_height_;
+  tree_root_->position_.width = canvas_width_;
+  CalculatePositions(tree_root_->left_child_);
+  CalculatePositions(tree_root_->right_child_);
+  return true;
+}
+
+// After calling CreateCollage() and FastAdjust(), call this function to save result
 // collage to a image file specified by out_put_image_path.
 cv::Mat CollageBasic::OutputCollageImage() const {
   // Traverse tree_leaves_ vector. Resize tile image and paste it on the canvas.
@@ -285,4 +326,35 @@ void CollageBasic::RandomSplitType(TreeNode* node) {
   }
   RandomSplitType(node->left_child_);
   RandomSplitType(node->right_child_);
+}
+
+void CollageBasic::AdjustAlpha(TreeNode *node) {
+  if (node->is_leaf_) return;
+  if (node == NULL) return;
+  
+  if (node->alpha_ > node->alpha_expect_ * 1.2) {
+    // Too big actual aspect ratio.
+    node->split_type_ = 'h';
+    node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
+    node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
+  } else if (node->alpha_ < node->alpha_expect_ / 1.2) {
+    // Too small actual aspect ratio.
+    node->split_type_ = 'v';
+    node->left_child_->alpha_expect_ = node->alpha_expect_ / 2;
+    node->right_child_->alpha_expect_ = node->alpha_expect_ / 2;
+  } else {
+    // Aspect ratio is okay.
+    if (node->split_type_ == 'h') {
+      node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
+      node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
+    } else if (node->split_type_ == 'v') {
+      node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
+      node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
+    } else {
+      std::cout << "Error: AdjustAlpha" << std::endl;
+      return;
+    }
+  }
+  AdjustAlpha(node->left_child_);
+  AdjustAlpha(node->right_child_);
 }
