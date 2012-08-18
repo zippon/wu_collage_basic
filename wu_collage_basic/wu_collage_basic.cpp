@@ -194,6 +194,7 @@ bool CollageBasic::ReadImageList(std::string input_image_list) {
 
 // Generate an initial full binary tree with image_num_ leaves.
 bool CollageBasic::GenerateInitialTree() {
+  tree_leaves_.clear();
   if (tree_root_ != NULL) ReleaseTree(tree_root_);
   tree_root_ = new TreeNode();
   // Step 1: create a (k-1)-depth binary tree with max nodes.
@@ -231,7 +232,6 @@ bool CollageBasic::GenerateInitialTree() {
   for (int i = 0; i < node_queue[k - 1].size(); ++i) {
     leaf_nodes.push_back(node_queue[k - 1][i]);
   };
-  tree_leaves_.clear();
 
   int leaf_num = pow(2, k - 1);
   bool* leaf_visited = new bool[leaf_num];
