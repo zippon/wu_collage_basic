@@ -9,6 +9,7 @@
 #include "wu_collage_basic.h"
 #include <iostream>
 #include <time.h>
+#include <stdlib.h>
 
 int main(int argc, const char * argv[])
 {
@@ -47,7 +48,8 @@ int main(int argc, const char * argv[])
   std::cout << "canvas_alpha: " << canvas_alpha << std::endl;
   std::cout << "processing time: " << (end - start) * 1000000 / CLOCKS_PER_SEC
             << " us (10e-6 s)" << std::endl;
-  my_collage.OutputCollageHtml("/Users/WU/result.html");
+  std::string html_save_path = "/tmp/collage_result.html";
+  my_collage.OutputCollageHtml(html_save_path);
   cv::imshow("Collage", canvas);
   cv::waitKey();
   

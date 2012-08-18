@@ -10,10 +10,6 @@
 #include <math.h>
 #include <fstream>
 #include <iostream>
-#include <queue>
-#include <time.h>
-#define random(x) (rand() % x)
-
 
 // Private member functions:
 // Call this function after declare a CollageBasic instance.
@@ -28,8 +24,6 @@ bool CollageBasic::CreateCollage() {
     std::cout << "Error: CreateCollage 2" << std::endl;
     return false;
   }
-  
-  srand(static_cast<unsigned>(time(0)));
   
   // A: generate a full balanced binary tree with image_num_ leaves.
   GenerateInitialTree();
@@ -64,8 +58,6 @@ bool CollageBasic::CreateCollage(float expect_alpha, float thresh) {
   float upper_bound = expect_alpha * thresh;
   int iter_counter = 1;
   int tree_gene_counter = 1;
-  
-  srand(static_cast<unsigned>(time(0)));
   
   // Do the initial tree generatio and calculation.
   // A: generate a full balanced binary tree with image_num_ leaves.
@@ -315,18 +307,87 @@ float CollageBasic::CalculateAlpha(TreeNode* node) {
   }
 }
 
+//// Top-down Calculate the image positions in the colage.
+//bool CollageBasic::CalculatePositions(TreeNode* node) {
+//  // Step 1: calculate height & width.
+//  if (node->parent_->split_type_ == 'v') {
+//    // Vertical cut, height unchanged.
+//    node->position_.height = node->parent_->position_.height;
+//    node->position_.width = node->position_.height * node->alpha_;
+//  } else if (node->parent_->split_type_ == 'h') {
+//    // Horizontal cut, width unchanged.
+//    node->position_.width = node->parent_->position_.width;
+//    node->position_.height = static_cast<int>
+//        (node->position_.width / node->alpha_);
+//  } else {
+//    std::cout << "Error: CalculatePositions step 1" << std::endl;
+//    return false;
+//  }
+//  
+//  // Step 2: calculate x & y.
+//  if (node->child_type_ == 'l') {
+//    // If it is left child, use its parent's x & y.
+//    node->position_.x = node->parent_->position_.x;
+//    node->position_.y = node->parent_->position_.y;
+//  } else if (node->child_type_ == 'r') {
+//    if (node->parent_->split_type_ == 'v') {
+//      // y (row) unchanged, x (colmn) changed.
+//      node->position_.y = node->parent_->position_.y;
+//      node->position_.x = node->parent_->position_.x +
+//                          node->parent_->position_.width -
+//                          node->position_.width;
+//    } else if (node->parent_->split_type_ == 'h') {
+//      // x (column) unchanged, y (row) changed.
+//      node->position_.x = node->parent_->position_.x;
+//      node->position_.y = node->parent_->position_.y +
+//                          node->parent_->position_.height -
+//                          node->position_.height;
+//    } else {
+//      std::cout << "Error: CalculatePositions step 2 - 1" << std::endl;
+//    }
+//  } else {
+//    std::cout << "Error: CalculatePositions step 2 - 2" << std::endl;
+//    return false;
+//  }
+//  
+//  // Calculation for children.
+//  if (node->left_child_) {
+//    bool success = CalculatePositions(node->left_child_);
+//    if (!success) return false;
+//  }
+//  if (node->right_child_) {
+//    bool success = CalculatePositions(node->right_child_);
+//    if (!success) return false;
+//  }
+//  return true;
+//}
+
 // Top-down Calculate the image positions in the colage.
 bool CollageBasic::CalculatePositions(TreeNode* node) {
   // Step 1: calculate height & width.
   if (node->parent_->split_type_ == 'v') {
     // Vertical cut, height unchanged.
     node->position_.height = node->parent_->position_.height;
-    node->position_.width = node->position_.height * node->alpha_;
+    if (node->child_type_ == 'l') {
+      node->position_.width = static_cast<int>
+      (node->position_.height * node->alpha_);
+    } else if (node->child_type_ == 'r') {
+      node->position_.width = node->parent_->position_.width -
+          node->parent_->left_child_->position_.width;
+    } else {
+      std::cout << "Error: CalculatePositions step 0" << std::endl;
+      return false;
+    }
   } else if (node->parent_->split_type_ == 'h') {
     // Horizontal cut, width unchanged.
     node->position_.width = node->parent_->position_.width;
-    node->position_.height = static_cast<int>
-        (node->position_.width / node->alpha_);
+    if (node->child_type_ == 'l') {
+      node->position_.height = static_cast<int>
+      (node->position_.width / node->alpha_);
+    } else if (node->child_type_ == 'r') {
+      node->position_.height = node->parent_->position_.height -
+      node->parent_->left_child_->position_.height;
+    }
   } else {
     std::cout << "Error: CalculatePositions step 1" << std::endl;
     return false;
@@ -342,14 +403,14 @@ bool CollageBasic::CalculatePositions(TreeNode* node) {
       // y (row) unchanged, x (colmn) changed.
       node->position_.y = node->parent_->position_.y;
       node->position_.x = node->parent_->position_.x +
-                          node->parent_->position_.width -
-                          node->position_.width;
+      node->parent_->position_.width -
+      node->position_.width;
     } else if (node->parent_->split_type_ == 'h') {
       // x (column) unchanged, y (row) changed.
       node->position_.x = node->parent_->position_.x;
       node->position_.y = node->parent_->position_.y +
-                          node->parent_->position_.height -
-                          node->position_.height;
+      node->parent_->position_.height -
+      node->position_.height;
     } else {
       std::cout << "Error: CalculatePositions step 2 - 1" << std::endl;
     }

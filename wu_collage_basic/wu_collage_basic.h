@@ -12,6 +12,8 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
+#include <time.h>
+#define random(x) (rand() % x)
 #define MAX_ITER_NUM 100       // Max number of aspect ratio adjustment.
 #define MAX_TREE_GENE_NUM 100  // Max number of tree re-generation.
 
@@ -56,6 +58,7 @@ public:
     canvas_width_ = -1;
     image_num_ = static_cast<int>(image_vec_.size());
     tree_root_ = new TreeNode();
+    srand(static_cast<unsigned>(time(0)));
   }
   ~CollageBasic() {
     ReleaseTree(tree_root_);
@@ -76,7 +79,7 @@ public:
   // We also define MAX_ITER_NUM = 100,
   // If max iteration number is reached and we cannot find a good result aspect ratio,
   // this function returns false.
-  bool CreateCollage(float expect_alpha, float thresh = 2);
+  bool CreateCollage(float expect_alpha, float thresh = 1.2);
   
   // Output collage into a single image.
   cv::Mat OutputCollageImage() const;
