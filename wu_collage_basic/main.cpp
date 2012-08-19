@@ -13,6 +13,7 @@
 
 int main(int argc, const char * argv[])
 {
+  std::cout << "Well come to \"Collage Basic\"" << std::endl << std::endl;
 
   if (argc != 2) {
     std::cout << "Error number of input arguments" << std::endl;

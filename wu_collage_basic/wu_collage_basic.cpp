@@ -31,10 +31,10 @@ bool CollageBasic::CreateCollage() {
   canvas_alpha_ = CalculateAlpha(tree_root_);
   canvas_width_ = static_cast<int>(canvas_height_ * canvas_alpha_);
   // C: set the position for all the tile images in the collage.
-  tree_root_->position_.x = 0;
-  tree_root_->position_.y = 0;
-  tree_root_->position_.height = canvas_height_;
-  tree_root_->position_.width = canvas_width_;
+  tree_root_->position_.x_ = 0;
+  tree_root_->position_.y_ = 0;
+  tree_root_->position_.height_ = canvas_height_;
+  tree_root_->position_.width_ = canvas_width_;
   CalculatePositions(tree_root_->left_child_);
   CalculatePositions(tree_root_->right_child_);
   return true;
@@ -50,14 +50,13 @@ bool CollageBasic::CreateCollage() {
 // We also define MAX_ITER_NUM = 100,
 // If max iteration number is reached and we cannot find a good result aspect ratio,
 // this function returns false.
-bool CollageBasic::CreateCollage(float expect_alpha, float thresh) {
+int CollageBasic::CreateCollage(float expect_alpha, float thresh) {
   assert(thresh > 1);
   assert(expect_alpha > 0);
   tree_root_->alpha_expect_ = expect_alpha;
   float lower_bound = expect_alpha / thresh;
   float upper_bound = expect_alpha * thresh;
-  int iter_counter = 1;
-  int tree_gene_counter = 1;
+  int total_iter_counter = 1;
   
   // Do the initial tree generatio and calculation.
   // A: generate a full balanced binary tree with image_num_ leaves.
@@ -66,43 +65,27 @@ bool CollageBasic::CreateCollage(float expect_alpha, float thresh) {
   canvas_alpha_ = CalculateAlpha(tree_root_);
   
   while ((canvas_alpha_ < lower_bound) || (canvas_alpha_ > upper_bound)) {
-    // Call the following function to adjust the aspect ratio from top to down.
-    tree_root_->alpha_expect_ = expect_alpha;
-    AdjustAlpha(tree_root_, thresh);
-    // Calculate actual aspect ratio again.
+    GenerateInitialTree();
     canvas_alpha_ = CalculateAlpha(tree_root_);
-    ++iter_counter;
-    if (iter_counter > MAX_ITER_NUM) {
+    ++total_iter_counter;
+    if (total_iter_counter > MAX_TREE_GENE_NUM) {
       std::cout << "*******************************" << std::endl;
       std::cout << "max iteration number reached..." << std::endl;
-      std::cout << "*******************************" << std::endl << std::endl;
-      // We should generate binary tree again
-      iter_counter = 1;
-      GenerateInitialTree();
-      canvas_alpha_ = CalculateAlpha(tree_root_);
-      ++tree_gene_counter;
-      if (tree_gene_counter > MAX_TREE_GENE_NUM) {
-        std::cout << "-------------------------------------------------------";
-        std::cout << std::endl;
-        std::cout << "WE HAVE DONE OUR BEST, BUT COLAAGE GENERATION FAILED...";
-        std::cout << std::endl;
-        std::cout << "-------------------------------------------------------";
-        std::cout << std::endl;
-        return false;
-      }
+      std::cout << "*******************************" << std::endl;
+      return -1;
     }
   }
   // std::cout << "Canvas generation success!" << std::endl;
-  std::cout << "Total iteration number is: " << iter_counter << std::endl;
+  std::cout << "Total iteration number is: " << total_iter_counter << std::endl;
   // After adjustment, set the position for all the tile images.
   canvas_width_ = static_cast<int>(canvas_height_ * canvas_alpha_);
-  tree_root_->position_.x = 0;
-  tree_root_->position_.y = 0;
-  tree_root_->position_.height = canvas_height_;
-  tree_root_->position_.width = canvas_width_;
+  tree_root_->position_.x_ = 0;
+  tree_root_->position_.y_ = 0;
+  tree_root_->position_.height_ = canvas_height_;
+  tree_root_->position_.width_ = canvas_width_;
   CalculatePositions(tree_root_->left_child_);
   CalculatePositions(tree_root_->right_child_);
-  return true;
+  return total_iter_counter;
 }
 
 // After calling CreateCollage() and FastAdjust(), call this function to save result
@@ -114,10 +97,11 @@ cv::Mat CollageBasic::OutputCollageImage() const {
   cv::Mat canvas(cv::Size(canvas_width_, canvas_height_), image_vec_[0].type());
   for (int i = 0; i < image_num_; ++i) {
     int img_ind = tree_leaves_[i]->image_index_;
-    cv::Rect pos = tree_leaves_[i]->position_;
-    cv::Mat roi(canvas, pos);
+    FloatRect pos = tree_leaves_[i]->position_;
+    cv::Rect pos_cv(pos.x_, pos.y_, pos.width_, pos.height_);
+    cv::Mat roi(canvas, pos_cv);
     assert(image_vec_[0].type() == image_vec_[img_ind].type());
-    cv::Mat resized_img(pos.height, pos.width, image_vec_[i].type());
+    cv::Mat resized_img(pos_cv.height, pos_cv.width, image_vec_[i].type());
     cv::resize(image_vec_[img_ind], resized_img, resized_img.size());
     resized_img.copyTo(roi);
   }
@@ -150,13 +134,13 @@ bool CollageBasic::OutputCollageHtml(const std::string output_html_path) {
     output_html << "\t\t\t\t<img src=\"";
     output_html << image_path_vec_[img_ind];
     output_html << "\" style=\"position:absolute; width:";
-    output_html << tree_leaves_[i]->position_.width;
+    output_html << tree_leaves_[i]->position_.width_;
     output_html << "px; height:";
-    output_html << tree_leaves_[i]->position_.height;
+    output_html << tree_leaves_[i]->position_.height_;
     output_html << "px; left:";
-    output_html << tree_leaves_[i]->position_.x;
+    output_html << tree_leaves_[i]->position_.x_;
     output_html << "px; top:";
-    output_html << tree_leaves_[i]->position_.y;
+    output_html << tree_leaves_[i]->position_.y_;
     output_html << "px;\">\n";
     output_html << "\t\t\t</a>\n";
   }
@@ -367,26 +351,24 @@ bool CollageBasic::CalculatePositions(TreeNode* node) {
   // Step 1: calculate height & width.
   if (node->parent_->split_type_ == 'v') {
     // Vertical cut, height unchanged.
-    node->position_.height = node->parent_->position_.height;
+    node->position_.height_ = node->parent_->position_.height_;
     if (node->child_type_ == 'l') {
-      node->position_.width = static_cast<int>
-      (node->position_.height * node->alpha_);
+      node->position_.width_ = node->position_.height_ * node->alpha_;
     } else if (node->child_type_ == 'r') {
-      node->position_.width = node->parent_->position_.width -
-          node->parent_->left_child_->position_.width;
+      node->position_.width_ = node->parent_->position_.width_ -
+          node->parent_->left_child_->position_.width_;
     } else {
       std::cout << "Error: CalculatePositions step 0" << std::endl;
       return false;
     }
   } else if (node->parent_->split_type_ == 'h') {
     // Horizontal cut, width unchanged.
-    node->position_.width = node->parent_->position_.width;
+    node->position_.width_ = node->parent_->position_.width_;
     if (node->child_type_ == 'l') {
-      node->position_.height = static_cast<int>
-      (node->position_.width / node->alpha_);
+      node->position_.height_ = node->position_.width_ / node->alpha_;
     } else if (node->child_type_ == 'r') {
-      node->position_.height = node->parent_->position_.height -
-      node->parent_->left_child_->position_.height;
+      node->position_.height_ = node->parent_->position_.height_ -
+      node->parent_->left_child_->position_.height_;
     }
   } else {
     std::cout << "Error: CalculatePositions step 1" << std::endl;
@@ -396,21 +378,21 @@ bool CollageBasic::CalculatePositions(TreeNode* node) {
   // Step 2: calculate x & y.
   if (node->child_type_ == 'l') {
     // If it is left child, use its parent's x & y.
-    node->position_.x = node->parent_->position_.x;
-    node->position_.y = node->parent_->position_.y;
+    node->position_.x_ = node->parent_->position_.x_;
+    node->position_.y_ = node->parent_->position_.y_;
   } else if (node->child_type_ == 'r') {
     if (node->parent_->split_type_ == 'v') {
       // y (row) unchanged, x (colmn) changed.
-      node->position_.y = node->parent_->position_.y;
-      node->position_.x = node->parent_->position_.x +
-      node->parent_->position_.width -
-      node->position_.width;
+      node->position_.y_ = node->parent_->position_.y_;
+      node->position_.x_ = node->parent_->position_.x_ +
+      node->parent_->position_.width_ -
+      node->position_.width_;
     } else if (node->parent_->split_type_ == 'h') {
       // x (column) unchanged, y (row) changed.
-      node->position_.x = node->parent_->position_.x;
-      node->position_.y = node->parent_->position_.y +
-      node->parent_->position_.height -
-      node->position_.height;
+      node->position_.x_ = node->parent_->position_.x_;
+      node->position_.y_ = node->parent_->position_.y_ +
+      node->parent_->position_.height_ -
+      node->position_.height_;
     } else {
       std::cout << "Error: CalculatePositions step 2 - 1" << std::endl;
     }
@@ -455,36 +437,36 @@ void CollageBasic::RandomSplitType(TreeNode* node) {
   RandomSplitType(node->right_child_);
 }
 
-void CollageBasic::AdjustAlpha(TreeNode *node, float thresh) {
-  assert(thresh > 1);
-  if (node->is_leaf_) return;
-  if (node == NULL) return;
-  
-  float thresh_2 = 1 + (thresh - 1) / 2;
-  
-  if (node->alpha_ > node->alpha_expect_ * thresh_2) {
-    // Too big actual aspect ratio.
-    node->split_type_ = 'h';
-    node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
-    node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
-  } else if (node->alpha_ < node->alpha_expect_ / thresh_2 ) {
-    // Too small actual aspect ratio.
-    node->split_type_ = 'v';
-    node->left_child_->alpha_expect_ = node->alpha_expect_ / 2;
-    node->right_child_->alpha_expect_ = node->alpha_expect_ / 2;
-  } else {
-    // Aspect ratio is okay.
-    if (node->split_type_ == 'h') {
-      node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
-      node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
-    } else if (node->split_type_ == 'v') {
-      node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
-      node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
-    } else {
-      std::cout << "Error: AdjustAlpha" << std::endl;
-      return;
-    }
-  }
-  AdjustAlpha(node->left_child_, thresh);
-  AdjustAlpha(node->right_child_, thresh);
-}
+//void CollageBasic::AdjustAlpha(TreeNode *node, float thresh) {
+//  assert(thresh > 1);
+//  if (node->is_leaf_) return;
+//  if (node == NULL) return;
+//  
+//  float thresh_2 = 1 + (thresh - 1) / 2;
+//  
+//  if (node->alpha_ > node->alpha_expect_ * thresh_2) {
+//    // Too big actual aspect ratio.
+//    node->split_type_ = 'h';
+//    node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
+//    node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
+//  } else if (node->alpha_ < node->alpha_expect_ / thresh_2 ) {
+//    // Too small actual aspect ratio.
+//    node->split_type_ = 'v';
+//    node->left_child_->alpha_expect_ = node->alpha_expect_ / 2;
+//    node->right_child_->alpha_expect_ = node->alpha_expect_ / 2;
+//  } else {
+//    // Aspect ratio is okay.
+//    if (node->split_type_ == 'h') {
+//      node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
+//      node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
+//    } else if (node->split_type_ == 'v') {
+//      node->left_child_->alpha_expect_ = node->alpha_expect_ * 2;
+//      node->right_child_->alpha_expect_ = node->alpha_expect_ * 2;
+//    } else {
+//      std::cout << "Error: AdjustAlpha" << std::endl;
+//      return;
+//    }
+//  }
+//  AdjustAlpha(node->left_child_, thresh);
+//  AdjustAlpha(node->right_child_, thresh);
+//}
