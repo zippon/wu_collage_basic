@@ -53,8 +53,10 @@ bool CollageBasic::CreateCollage() {
   tree_root_->position_.y_ = 0;
   tree_root_->position_.height_ = canvas_height_;
   tree_root_->position_.width_ = canvas_width_;
-  CalculatePositions(tree_root_->left_child_);
-  CalculatePositions(tree_root_->right_child_);
+  if (tree_root_->left_child_)
+    CalculatePositions(tree_root_->left_child_);
+  if (tree_root_->right_child_)
+    CalculatePositions(tree_root_->right_child_);
   return true;
 };
 
@@ -101,8 +103,10 @@ int CollageBasic::CreateCollage(float expect_alpha, float thresh) {
   tree_root_->position_.y_ = 0;
   tree_root_->position_.height_ = canvas_height_;
   tree_root_->position_.width_ = canvas_width_;
-  CalculatePositions(tree_root_->left_child_);
-  CalculatePositions(tree_root_->right_child_);
+  if (tree_root_->left_child_)
+    CalculatePositions(tree_root_->left_child_);
+  if (tree_root_->right_child_)
+    CalculatePositions(tree_root_->right_child_);
   return total_iter_counter;
 }
 
