@@ -117,6 +117,7 @@ cv::Mat CollageBasic::OutputCollageImage() const {
   assert(canvas_alpha_ != -1);
   assert(canvas_width_ != -1);
   cv::Mat canvas(cv::Size(canvas_width_, canvas_height_), image_vec_[0].type());
+  assert(image_vec_[0].type() == CV_8UC3);
   for (int i = 0; i < image_num_; ++i) {
     int img_ind = tree_leaves_[i]->image_index_;
     FloatRect pos = tree_leaves_[i]->position_;
