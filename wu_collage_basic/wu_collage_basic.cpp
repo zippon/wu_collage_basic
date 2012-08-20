@@ -11,6 +11,24 @@
 #include <fstream>
 #include <iostream>
 
+CollageBasic::CollageBasic(std::vector<std::string> input_image_list,
+                           int canvas_height) {
+  for (int i = 0; i < input_image_list.size(); ++i) {
+    std::string img_path = input_image_list[i];
+    cv::Mat img = cv::imread(img_path.c_str());
+    image_vec_.push_back(img);
+    float img_alpha = static_cast<float>(img.cols) / img.rows;
+    image_alpha_vec_.push_back(img_alpha);
+    image_path_vec_.push_back(img_path);
+  }
+  canvas_height_ = canvas_height;
+  canvas_alpha_ = -1;
+  canvas_width_ = -1;
+  image_num_ = static_cast<int>(input_image_list.size());
+  srand(static_cast<unsigned>(time(0)));
+  tree_root_ = new TreeNode();
+}
+
 // Private member functions:
 // Call this function after declare a CollageBasic instance.
 // This function will create a non-fixed aspect ratio image collage.

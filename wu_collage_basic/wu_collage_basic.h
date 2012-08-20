@@ -73,6 +73,7 @@ public:
     tree_root_ = new TreeNode();
     srand(static_cast<unsigned>(time(0)));
   }
+  CollageBasic(std::vector<std::string> input_image_list, int canvas_height);
   ~CollageBasic() {
     ReleaseTree(tree_root_);
     image_vec_.clear();
