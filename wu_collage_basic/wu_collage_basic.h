@@ -64,16 +64,16 @@ public:
   // We need to let the user decide the canvas height.
   // Since the aspect ratio will be calculate by our program, we can compute
   // canvas width accordingly.
-  CollageBasic (const std::string input_image_list, int canvas_height) {
+  CollageBasic (const std::string input_image_list, int canvas_width) {
     ReadImageList(input_image_list);
-    canvas_height_ = canvas_height;
+    canvas_width_ = canvas_width;
     canvas_alpha_ = -1;
-    canvas_width_ = -1;
+    canvas_height_ = -1;
     image_num_ = static_cast<int>(image_vec_.size());
     tree_root_ = new TreeNode();
     srand(static_cast<unsigned>(time(0)));
   }
-  CollageBasic(const std::vector<std::string> input_image_list, int canvas_height);
+  CollageBasic(const std::vector<std::string> input_image_list, int canvas_width);
   ~CollageBasic() {
     ReleaseTree(tree_root_);
     image_vec_.clear();

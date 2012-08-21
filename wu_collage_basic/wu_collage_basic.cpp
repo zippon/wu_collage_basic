@@ -12,7 +12,7 @@
 #include <iostream>
 
 CollageBasic::CollageBasic(std::vector<std::string> input_image_list,
-                           int canvas_height) {
+                           int canvas_width) {
   for (int i = 0; i < input_image_list.size(); ++i) {
     std::string img_path = input_image_list[i];
     cv::Mat img = cv::imread(img_path.c_str());
@@ -21,9 +21,9 @@ CollageBasic::CollageBasic(std::vector<std::string> input_image_list,
     image_alpha_vec_.push_back(img_alpha);
     image_path_vec_.push_back(img_path);
   }
-  canvas_height_ = canvas_height;
+  canvas_width_ = canvas_width;
   canvas_alpha_ = -1;
-  canvas_width_ = -1;
+  canvas_height_ = -1;
   image_num_ = static_cast<int>(input_image_list.size());
   srand(static_cast<unsigned>(time(0)));
   tree_root_ = new TreeNode();
@@ -38,7 +38,7 @@ bool CollageBasic::CreateCollage() {
     std::cout << "Error: CreateCollage 1" << std::endl;
     return false;
   }
-  if (canvas_height_ <= 0) {
+  if (canvas_width_ <= 0) {
     std::cout << "Error: CreateCollage 2" << std::endl;
     return false;
   }
@@ -47,7 +47,7 @@ bool CollageBasic::CreateCollage() {
   GenerateInitialTree();
   // B: recursively calculate aspect ratio.
   canvas_alpha_ = CalculateAlpha(tree_root_);
-  canvas_width_ = static_cast<int>(canvas_height_ * canvas_alpha_);
+  canvas_height_ = static_cast<int>(canvas_width_ / canvas_alpha_);
   // C: set the position for all the tile images in the collage.
   tree_root_->position_.x_ = 0;
   tree_root_->position_.y_ = 0;
@@ -98,7 +98,7 @@ int CollageBasic::CreateCollage(float expect_alpha, float thresh) {
   // std::cout << "Canvas generation success!" << std::endl;
   std::cout << "Total iteration number is: " << total_iter_counter << std::endl;
   // After adjustment, set the position for all the tile images.
-  canvas_width_ = static_cast<int>(canvas_height_ * canvas_alpha_);
+  canvas_height_ = static_cast<int>(canvas_width_ / canvas_alpha_);
   tree_root_->position_.x_ = 0;
   tree_root_->position_.y_ = 0;
   tree_root_->position_.height_ = canvas_height_;
