@@ -182,8 +182,8 @@
 		94627FE415DA00A80073D3B9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = "/usr/local/include/**";
-				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				OTHER_LDFLAGS = (
 					"-lopencv_core",
 					"-lopencv_highgui",
@@ -197,8 +197,8 @@
 		94627FE515DA00A80073D3B9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = "/usr/local/include/**";
-				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				OTHER_LDFLAGS = (
 					"-lopencv_core",
 					"-lopencv_highgui",
